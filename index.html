@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#00ff88" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="EXUEMR" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <title>EXUEMR // GRABBER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05070a;
+      --panel: #0a1410;
+      --panel-2: #0c1a14;
+      --grid: rgba(0, 255, 140, 0.04);
+      --neon: #00ff88;
+      --neon-dim: #00b366;
+      --cyan: #00e5ff;
+      --magenta: #ff2bd6;
+      --amber: #ffb000;
+      --danger: #ff3355;
+      --text: #c8ffd8;
+      --muted: #5a8a72;
+      --border: #103324;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: 'JetBrains Mono', 'Share Tech Mono', ui-monospace, Menlo, Consolas, monospace;
+      color: var(--text);
+      background:
+        linear-gradient(var(--grid) 1px, transparent 1px) 0 0/22px 22px,
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px) 0 0/22px 22px,
+        radial-gradient(900px 500px at 50% -10%, rgba(0,255,136,0.08), transparent 60%),
+        radial-gradient(700px 400px at 100% 110%, rgba(0,229,255,0.06), transparent 60%),
+        var(--bg);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 14px 60px;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 0px,
+        rgba(0,0,0,0) 2px,
+        rgba(0,255,136,0.025) 3px,
+        rgba(0,0,0,0) 4px
+      );
+      mix-blend-mode: screen;
+      z-index: 1;
+    }
+    .wrap { width: 100%; max-width: 760px; position: relative; z-index: 2; }
+
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: var(--muted); letter-spacing: 0.18em; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .topbar .left { display: flex; align-items: center; gap: 10px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--neon); box-shadow: 0 0 10px var(--neon); animation: pulse 1.6s ease-in-out infinite; }
+    @keyframes pulse { 50% { opacity: .35; } }
+    .lang { display: flex; gap: 4px; }
+    .lang button {
+      font-family: inherit; font-size: 10px; font-weight: 700;
+      padding: 4px 8px; border-radius: 2px;
+      background: transparent; color: var(--muted); border: 1px solid var(--border);
+      cursor: pointer; letter-spacing: .12em;
+    }
+    .lang button.active { color: #001a0d; background: var(--neon); border-color: var(--neon); box-shadow: 0 0 12px rgba(0,255,136,0.5); }
+
+    .logo {
+      display: flex; align-items: center; gap: 6px;
+      margin: 6px 0 2px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+      font-size: clamp(34px, 7vw, 54px);
+      line-height: 1;
+      letter-spacing: 0.16em;
+      color: var(--neon);
+      text-shadow:
+        0 0 10px rgba(0,255,136,0.55),
+        0 0 22px rgba(0,255,136,0.25);
+      user-select: none;
+    }
+    .logo-bracket {
+      color: var(--neon-dim);
+      font-weight: 400;
+      opacity: .8;
+    }
+    .logo-text {
+      position: relative;
+      background: linear-gradient(180deg, #aaffd0 0%, var(--neon) 55%, #008f57 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 14px rgba(0,255,136,0.45));
+    }
+    .logo-text::before, .logo-text::after {
+      content: attr(data-text);
+      position: absolute; left: 0; top: 0;
+      width: 100%;
+      mix-blend-mode: screen;
+      pointer-events: none;
+      -webkit-text-fill-color: initial;
+    }
+    .logo-text::before { color: var(--magenta); transform: translate(-2px, 0); opacity: .55; animation: glitchA 4s infinite steps(1); }
+    .logo-text::after  { color: var(--cyan);    transform: translate( 2px, 0); opacity: .55; animation: glitchB 4s infinite steps(1); }
+    @keyframes glitchA {
+      0%, 92%, 100% { clip-path: inset(0 0 0 0); transform: translate(-2px, 0); }
+      93% { clip-path: inset(10% 0 70% 0); transform: translate(-3px, 0); }
+      96% { clip-path: inset(60% 0 20% 0); transform: translate(-1px, 1px); }
+    }
+    @keyframes glitchB {
+      0%, 90%, 100% { clip-path: inset(0 0 0 0); transform: translate(2px, 0); }
+      91% { clip-path: inset(40% 0 40% 0); transform: translate(3px, 0); }
+      95% { clip-path: inset(75% 0 5% 0); transform: translate(1px, -1px); }
+    }
+    .logo-cursor {
+      width: 14px; height: clamp(34px, 7vw, 54px);
+      background: var(--neon);
+      box-shadow: 0 0 14px var(--neon);
+      animation: caret 1s steps(2, start) infinite;
+      margin-left: 2px;
+    }
+    @keyframes caret { to { opacity: 0; } }
+    .brand {
+      display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+      margin: 4px 0 4px;
+    }
+    .brand h1 {
+      font-family: 'JetBrains Mono', monospace;
+      margin: 0;
+      font-size: clamp(22px, 4vw, 30px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .brand h1 .slash { color: var(--neon); text-shadow: 0 0 10px rgba(0,255,136,0.55); }
+    .brand h1 .glitch { position: relative; }
+    .brand .tag { font-size: 11px; color: var(--cyan); letter-spacing: .2em; text-transform: uppercase; }
+    p.lead { color: var(--muted); margin: 4px 0 16px; font-size: 13px; }
+
+    .panel {
+      position: relative;
+      background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 18px;
+      box-shadow:
+        0 0 0 1px rgba(0,255,136,0.04) inset,
+        0 0 30px rgba(0,255,136,0.05),
+        0 20px 60px rgba(0,0,0,0.55);
+    }
+    .panel::before {
+      content: "";
+      position: absolute; top: -1px; left: -1px; right: -1px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon), transparent);
+      opacity: .55;
+    }
+    .panel-head {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 10px; color: var(--muted); letter-spacing: .25em; text-transform: uppercase;
+      padding-bottom: 10px; margin-bottom: 14px; border-bottom: 1px dashed var(--border);
+    }
+    .panel-head .badges { display: flex; gap: 6px; }
+    .badge { padding: 2px 6px; border: 1px solid var(--border); color: var(--neon-dim); font-size: 10px; }
+
+    label { font-size: 10px; color: var(--muted); display: block; margin-bottom: 6px; letter-spacing: .2em; text-transform: uppercase; }
+    .input-line { display: flex; align-items: center; gap: 8px; }
+    .prompt { color: var(--neon); font-weight: 700; user-select: none; }
+    input[type="url"], select {
+      width: 100%;
+      padding: 12px 12px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+      background: #03100a;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+      caret-color: var(--neon);
+    }
+    input[type="url"]:focus, select:focus {
+      border-color: var(--neon);
+      box-shadow: 0 0 0 2px rgba(0,255,136,0.18);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .checkbox {
+      display: flex; align-items: center; gap: 8px; margin-top: 2px; color: var(--text); font-size: 13px;
+      padding: 11px 12px; border: 1px solid var(--border); background: #03100a; border-radius: 2px;
+    }
+    .checkbox input { accent-color: var(--neon); width: 16px; height: 16px; }
+    .actions { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    button {
+      appearance: none;
+      cursor: pointer;
+      padding: 12px 16px;
+      border-radius: 2px;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 13px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #001a0d;
+      background: var(--neon);
+      border: 1px solid var(--neon);
+      box-shadow: 0 0 18px rgba(0,255,136,0.35);
+      transition: transform .05s ease, opacity .2s ease, box-shadow .2s ease;
+    }
+    button:hover:not(:disabled) { box-shadow: 0 0 26px rgba(0,255,136,0.55); }
+    button.ghost {
+      background: transparent;
+      color: var(--neon);
+      border: 1px solid var(--neon-dim);
+      box-shadow: none;
+    }
+    button.ghost:hover:not(:disabled) { background: rgba(0,255,136,0.08); }
+    button:disabled { opacity: .55; cursor: not-allowed; box-shadow: none; }
+    button:active:not(:disabled) { transform: translateY(1px); }
+
+    .console {
+      margin-top: 16px;
+      min-height: 24px;
+      font-size: 13px;
+      color: var(--muted);
+      background: #02080a;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 10px 12px;
+      font-family: 'Share Tech Mono', monospace;
+      word-break: break-word;
+    }
+    .console .ok { color: var(--neon); text-shadow: 0 0 6px rgba(0,255,136,0.5); }
+    .console .err { color: var(--danger); }
+    .console .info { color: var(--cyan); }
+    .console b.tag { color: var(--amber); margin-right: 6px; }
+
+    .target {
+      margin-top: 16px;
+      display: none;
+      gap: 14px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: #03100a;
+      align-items: flex-start;
+    }
+    .target.show { display: flex; }
+    .target img { width: 144px; height: 84px; object-fit: cover; border-radius: 2px; background: #000; border: 1px solid var(--border); }
+    .target .meta { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .target .t { font-weight: 700; font-size: 14px; color: var(--text); word-break: break-word; }
+    .target .s { color: var(--muted); font-size: 12px; }
+
+    .footstrip {
+      margin-top: 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 10px; color: var(--muted); letter-spacing: .2em; text-transform: uppercase;
+    }
+    .signature {
+      text-align: center;
+      margin-top: 16px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+    }
+    .signature .b { color: var(--muted); }
+    .signature .name {
+      color: var(--neon);
+      text-shadow: 0 0 10px rgba(0,255,136,0.55);
+      animation: flicker 4s infinite;
+    }
+    @keyframes flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 1; }
+      20%, 24%, 55% { opacity: .55; }
+    }
+
+    .spinner {
+      display: inline-block; width: 10px; height: 10px;
+      background: var(--neon);
+      animation: blink .8s steps(2, start) infinite;
+      vertical-align: 0;
+      margin-right: 8px;
+      box-shadow: 0 0 10px var(--neon);
+    }
+    @keyframes blink { to { opacity: 0; } }
+
+    @media (max-width: 560px) {
+      .row { grid-template-columns: 1fr; }
+      .ascii { font-size: 9px; }
+      .actions button { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="left">
+        <span class="dot"></span>
+        <span data-i18n="status_online">SYS // ONLINE</span>
+      </div>
+      <div class="lang">
+        <button type="button" data-lang="tr">TR</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+
+    <div class="logo" aria-hidden="true">
+      <span class="logo-bracket">[</span><span class="logo-text" data-text="EXUEMR">EXUEMR</span><span class="logo-bracket">]</span>
+      <span class="logo-cursor"></span>
+    </div>
+
+    <div class="brand">
+      <h1><span class="slash">//</span> <span class="glitch">VIDEO_GRABBER</span></h1>
+      <span class="tag" data-i18n="version">v1.0 · stealth build</span>
+    </div>
+    <p class="lead" data-i18n="lead">URL'yi yapıştır, hedefi belirle, indir. Hızlı ve sessiz.</p>
+
+    <div class="panel">
+      <div class="panel-head">
+        <span data-i18n="targetHead">// hedef parametreleri</span>
+        <div class="badges">
+          <span class="badge">YT-DLP</span>
+          <span class="badge">FFMPEG</span>
+        </div>
+      </div>
+
+      <form id="form">
+        <label for="url" data-i18n="urlLabel">> Hedef URL</label>
+        <div class="input-line">
+          <span class="prompt">$</span>
+          <input id="url" name="url" type="url" required
+                 placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" />
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="quality" data-i18n="qualityLabel">> Çözünürlük</label>
+            <select id="quality" name="quality">
+              <option value="best"  data-i18n="qBest">En iyi mevcut</option>
+              <option value="1080"  data-i18n="q1080">1080p'ye kadar</option>
+              <option value="720"   data-i18n="q720">720p'ye kadar</option>
+              <option value="480"   data-i18n="q480">480p'ye kadar</option>
+              <option value="360"   data-i18n="q360">360p'ye kadar</option>
+            </select>
+          </div>
+          <div>
+            <label data-i18n="modeLabel">> Mod</label>
+            <div class="checkbox">
+              <input type="checkbox" id="audio_only" name="audio_only" />
+              <label for="audio_only" style="margin:0; text-transform:none; letter-spacing:0; color:var(--text); font-size:13px;" data-i18n="audioOnly">Yalnızca ses (MP3)</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="fetchInfo" class="ghost" data-i18n="fetchBtn">[ Tara ]</button>
+          <button type="submit" id="downloadBtn" data-i18n="downloadBtn">[ İndir ]</button>
+        </div>
+      </form>
+
+      <div id="info" class="target">
+        <img id="thumb" alt="" />
+        <div class="meta">
+          <div id="title" class="t"></div>
+          <div id="uploader" class="s"></div>
+          <div id="duration" class="s"></div>
+        </div>
+      </div>
+
+      <div id="status" class="console" aria-live="polite">
+        <b class="tag">[exuemr@grabber ~]$</b><span data-i18n="ready_init">sistem hazır. komut bekleniyor...</span>
+      </div>
+    </div>
+
+    <div class="footstrip">
+      <span data-i18n="foot_l">// kişisel kullanım · platform kurallarına dikkat</span>
+      <span class="foot-time" id="footTime">--:--:--</span>
+    </div>
+
+    <div class="signature">
+      <span class="b">&lt;/&gt;</span> <span class="name">by Exuemr</span> <span class="b">&lt;/&gt;</span>
+    </div>
+  </div>
+
+<script>
+  const I18N = {
+    tr: {
+      status_online: "SİS // ÇEVRİMİÇİ",
+      version: "v1.0 · gizli sürüm",
+      lead: "URL'yi yapıştır, hedefi belirle, indir. Hızlı ve sessiz.",
+      targetHead: "// hedef parametreleri",
+      urlLabel: "> Hedef URL",
+      qualityLabel: "> Çözünürlük",
+      modeLabel: "> Mod",
+      audioOnly: "Yalnızca ses (MP3)",
+      qBest: "En iyi mevcut", q1080: "1080p'ye kadar", q720: "720p'ye kadar", q480: "480p'ye kadar", q360: "360p'ye kadar",
+      fetchBtn: "[ Tara ]",
+      downloadBtn: "[ İndir ]",
+      foot_l: "// kişisel kullanım · platform kurallarına dikkat",
+      ready_init: "sistem hazır. komut bekleniyor...",
+      enterUrl: "[!] önce bir URL gir.",
+      fetching: "hedef taranıyor",
+      cantFetch: "[!] hedef bilgisi alınamadı.",
+      ready: "[ok] hedef kilitlendi. indirmeye hazır.",
+      downloading: "indiriliyor",
+      downloadFailed: "[!] indirme başarısız.",
+      complete: "[ok] indirme tamam: ",
+      network: "[!] ağ hatası: ",
+      by: "Yükleyen ",
+      duration: "Süre ",
+      htmlLang: "tr",
+    },
+    en: {
+      status_online: "SYS // ONLINE",
+      version: "v1.0 · stealth build",
+      lead: "Paste the URL, lock the target, grab it. Fast and quiet.",
+      targetHead: "// target parameters",
+      urlLabel: "> Target URL",
+      qualityLabel: "> Quality",
+      modeLabel: "> Mode",
+      audioOnly: "Audio only (MP3)",
+      qBest: "Best available", q1080: "Up to 1080p", q720: "Up to 720p", q480: "Up to 480p", q360: "Up to 360p",
+      fetchBtn: "[ Scan ]",
+      downloadBtn: "[ Grab ]",
+      foot_l: "// personal use · respect platform rules",
+      ready_init: "system ready. awaiting command...",
+      enterUrl: "[!] enter a URL first.",
+      fetching: "scanning target",
+      cantFetch: "[!] could not fetch target info.",
+      ready: "[ok] target locked. ready to grab.",
+      downloading: "downloading",
+      downloadFailed: "[!] download failed.",
+      complete: "[ok] grab complete: ",
+      network: "[!] network error: ",
+      by: "By ",
+      duration: "Duration ",
+      htmlLang: "en",
+    }
+  };
+
+  let currentLang = localStorage.getItem('lang') || (navigator.language && navigator.language.toLowerCase().startsWith('tr') ? 'tr' : 'tr');
+
+  function applyLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('lang', lang);
+    const dict = I18N[lang];
+    document.documentElement.lang = dict.htmlLang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key] != null) el.textContent = dict[key];
+    });
+    document.querySelectorAll('.lang button').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+    });
+  }
+  document.querySelectorAll('.lang button').forEach(b => {
+    b.addEventListener('click', () => applyLang(b.getAttribute('data-lang')));
+  });
+  applyLang(currentLang);
+
+  const footTime = document.getElementById('footTime');
+  function tickClock() {
+    const d = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    if (footTime) footTime.textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+
+  const form = document.getElementById('form');
+  const urlInput = document.getElementById('url');
+  const quality = document.getElementById('quality');
+  const audioOnly = document.getElementById('audio_only');
+  const fetchBtn = document.getElementById('fetchInfo');
+  const dlBtn = document.getElementById('downloadBtn');
+  const statusEl = document.getElementById('status');
+  const infoEl = document.getElementById('info');
+  const thumb = document.getElementById('thumb');
+  const titleEl = document.getElementById('title');
+  const uploaderEl = document.getElementById('uploader');
+  const durationEl = document.getElementById('duration');
+
+  const t = () => I18N[currentLang];
+
+  function setStatus(html, kind) {
+    const klass = kind ? ' class="' + kind + '"' : '';
+    statusEl.innerHTML = '<b class="tag">[exuemr@grabber ~]$</b><span' + klass + '>' + html + '</span>';
+  }
+  function fmtDuration(s) {
+    if (!s && s !== 0) return '';
+    s = Math.floor(s);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return (h ? h + ':' : '') + String(m).padStart(h ? 2 : 1, '0') + ':' + String(sec).padStart(2, '0');
+  }
+
+  fetchBtn.addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+    if (!url) { setStatus(t().enterUrl, 'err'); return; }
+    infoEl.classList.remove('show');
+    setStatus('<span class="spinner"></span>' + t().fetching + '...', 'info');
+    fetchBtn.disabled = true;
+    try {
+      const fd = new FormData();
+      fd.append('url', url);
+      const res = await fetch('/info', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) { setStatus(data.error || t().cantFetch, 'err'); return; }
+      titleEl.textContent = data.title || '—';
+      uploaderEl.textContent = data.uploader ? t().by + data.uploader : '';
+      durationEl.textContent = data.duration ? t().duration + fmtDuration(data.duration) : '';
+      if (data.thumbnail) { thumb.src = data.thumbnail; thumb.style.display = ''; }
+      else { thumb.removeAttribute('src'); thumb.style.display = 'none'; }
+      infoEl.classList.add('show');
+      setStatus(t().ready, 'ok');
+    } catch (e) {
+      setStatus(t().network + e.message, 'err');
+    } finally {
+      fetchBtn.disabled = false;
+    }
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = urlInput.value.trim();
+    if (!url) { setStatus(t().enterUrl, 'err'); return; }
+    setStatus('<span class="spinner"></span>' + t().downloading + '...', 'info');
+    dlBtn.disabled = true;
+    fetchBtn.disabled = true;
+    try {
+      const fd = new FormData();
+      fd.append('url', url);
+      fd.append('quality', quality.value);
+      if (audioOnly.checked) fd.append('audio_only', 'on');
+
+      const res = await fetch('/download', { method: 'POST', body: fd });
+      if (!res.ok) {
+        let msg = t().downloadFailed;
+        try { const j = await res.json(); msg = j.error || msg; } catch {}
+        setStatus(msg, 'err');
+        return;
+      }
+      const disp = res.headers.get('Content-Disposition') || '';
+      let filename = 'download';
+      const m = /filename\*?=(?:UTF-8'')?\"?([^\";]+)\"?/i.exec(disp);
+      if (m) { try { filename = decodeURIComponent(m[1]); } catch { filename = m[1]; } }
+
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      const objUrl = URL.createObjectURL(blob);
+      a.href = objUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(objUrl), 1000);
+      setStatus(t().complete + filename, 'ok');
+    } catch (err) {
+      setStatus(t().network + err.message, 'err');
+    } finally {
+      dlBtn.disabled = false;
+      fetchBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
